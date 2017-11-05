@@ -3,6 +3,7 @@ warning off Simulink:SL_LoadMdlParameterizedLink
 warning off Simulink:Engine:SaveWithParameterizedLinks_Warning
 warning off Simulink:Engine:SaveWithDisabledLinks_Warning
 warning off Simulink:Commands:LoadMdlParameterizedLink
+warning off Simulink:Engine:OutputNotConnected % added by calan
 
 if length(getenv('XILINX_PATH')) == 0
   setenv('XILINX_PATH', regexprep(getenv('XILINX'),'/ISE$',''));
@@ -11,6 +12,7 @@ addpath([getenv('XILINX_PATH'), '/ISE/sysgen/util/']);
 addpath([getenv('XILINX_PATH'), '/ISE/sysgen/bin/lin64']);
 addpath([getenv('MLIB_DEVEL_PATH'), '/casper_library']);
 addpath([getenv('MLIB_DEVEL_PATH'), '/xps_library']);
+addpath(genpath([getenv('MLIB_DEVEL_PATH'), '/calan_lib'])) % added by calan
 xlAddSysgen([getenv('XILINX_PATH'), '/ISE'])
 sysgen_startup
 % If CASPER_BACKPORT is in the environment with non-zero length, then force
