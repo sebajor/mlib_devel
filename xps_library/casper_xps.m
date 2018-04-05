@@ -141,6 +141,8 @@ function varargout = run_Callback(h, eventdata, handles, varargin)
 design_name = get(handles.design_name,'String');
 xsg_version = get(handles.xsg_version,'Value');
 
+tgprintf(strcat(['Compilation for ', design_name, '.slx started.']));
+
 flow_vec.update = get(handles.run_update , 'Value');
 flow_vec.drc = get(handles.run_drc , 'Value');
 flow_vec.xsg = get(handles.run_xsg , 'Value');
@@ -174,9 +176,11 @@ try
     disp(['    EDK/ISE backend..........',datestr(time_struct.edk     ,13)]);
     disp('===================================================================');
     msgbox(['CASPER XPS run successfully completed in ',datestr(time_total,13),'!']);
+    tgprintf(strcat(['Compilation finished successfully in ', datestr(time_total,13), '!']));
 catch ex
     dump_exception(ex);
     errordlg(sprintf('Error detected running CASPER XPS:\n%s', ex.message));
+    tgprintf('Compilation failed :(');
 end
 
 
