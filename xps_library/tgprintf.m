@@ -22,7 +22,8 @@ function ret = tgprintf(varargin)
 
 str = sprintf(varargin{:});
 
-if exist(strcat(getenv('MLIB_DEVEL_PATH'), '/telegram_bot.mat'))==2
+%if exist(strcat(getenv('MLIB_DEVEL_PATH'), '/telegram_bot.mat'))==2
+try
     % load telegram data
     load(strcat(getenv('MLIB_DEVEL_PATH'), '/telegram_bot.mat'));
     % convert MATLAB string to url query string
@@ -33,7 +34,7 @@ if exist(strcat(getenv('MLIB_DEVEL_PATH'), '/telegram_bot.mat'))==2
 
     % send a message   
     ret = urlread(sendstr); 
-else
+catch
     % print to MATLAB command window
     fprintf(strcat(str, '\n'));
 end
