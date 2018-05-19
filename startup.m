@@ -3,6 +3,7 @@ warning off Simulink:SL_LoadMdlParameterizedLink
 warning off Simulink:Engine:SaveWithParameterizedLinks_Warning
 warning off Simulink:Engine:SaveWithDisabledLinks_Warning
 warning off Simulink:Commands:LoadMdlParameterizedLink
+warning off Simulink:Engine:OutputNotConnected % added by calan
 
 if length(getenv('XILINX_PATH')) == 0
   setenv('XILINX_PATH', regexprep(getenv('XILINX'),'/ISE$',''));
