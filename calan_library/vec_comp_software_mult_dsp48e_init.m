@@ -137,9 +137,12 @@ function vec_comp_software_mult_dsp48e_init(blk, varargin)
     reuse_block(blk, 'dout', 'simulink/Sinks/Out1', ...
         'Port', '1', ...
         'Position', [1085 233 1115 247]);
-        
+    
+    quant_str = {'Truncate', 'Round (unbiased: +/- Inf)'};
+    of_str = {'Wrap', 'Saturate', 'Flag as error'};
     annotation = sprintf('%d_%d * %d_%d ==> %d_%d\n%s, %s', ...
-        din_n_bits, din_bin_pt, bram_n_bits, bram_bin_pt, dout_n_bits, dout_bin_pt, quantization, overflow);
+        din_n_bits, din_bin_pt, bram_n_bits, bram_bin_pt, dout_n_bits, dout_bin_pt,...
+        cell2mat(quant_str(quantization)), cell2mat(of_str(overflow)));
     set_param(blk, 'AttributesFormatString', annotation);
         
     % add lines

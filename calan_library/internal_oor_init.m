@@ -82,7 +82,7 @@ function internal_oor_init (blk, varargin)
         'inputs', num2str(n_inputs), ...
         'Position', [300 diff_y*1-10 300+30 diff_y*n_inputs-10+104]);
     
-    reuse_block(blk, 'reg', 'xbsIndex/Register', ...
+    reuse_block(blk, 'reg1', 'xbsIndex_r4/Register', ...
         'rst', 'on', ...
         'en', 'on', ...
         'Position', [450 diff_y*(n_inputs+1)/2+52-28-10 450+60 diff_y*(n_inputs+1)/2+52+28-10]);
@@ -98,10 +98,10 @@ function internal_oor_init (blk, varargin)
     for i=1:n_inputs
         add_line(blk, strcat('or_', num2str(i), '/1'), strcat('final_or/', num2str(i)));
     end
-    add_line(blk, 'final_or/1', 'reg/1');
-    add_line(blk, 'final_or/1', 'reg/3');
-    add_line(blk, 'rst/1', 'reg/2');
-    add_line(blk, 'reg/1', 'out_of_range/1');
+    add_line(blk, 'final_or/1', 'reg1/1');
+    add_line(blk, 'final_or/1', 'reg1/3');
+    add_line(blk, 'rst/1', 'reg1/2');
+    add_line(blk, 'reg1/1', 'out_of_range/1');
     
     clean_blocks(blk);
     save_state(blk, varargin{:});
