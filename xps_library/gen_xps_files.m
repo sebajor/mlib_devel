@@ -47,13 +47,6 @@ if nargin == 2 && isstruct(flow_vec),
     run_elab     = flow_vec.elab    ;
     run_software = flow_vec.software;
     run_edk      = flow_vec.edk     ;
-    try
-        run_smartxplorer = flow_vec.smartxplorer;
-        num_smartxplorer = flow_vec.smartxplorer_num;
-    catch
-        run_smartxplorer = -1;
-        num_smartxplorer = 0;
-    end
 else
     run_update   = 1;
     run_drc      = 1;
@@ -64,8 +57,6 @@ else
     run_elab     = 1;
     run_software = 1;
     run_edk      = 1;
-    run_smartxplorer = 0;
-    num_smartxplorer = 0;
 end
 
 slash = '\';
@@ -532,11 +523,7 @@ if run_edkgen,
     gen_xps_mod_ucf(xsg_obj, xps_objs, mssge_proj, mssge_paths, slash);
 
     % add extra register and snapshot info from the design
-    try
-        gen_xps_add_design_info(sys, mssge_paths, slash);
-    catch
-        disp('WARNING WARNING PAIN SUFFERING ALARUM ALARUM - adding design info failed for some reason.');
-    end
+    gen_xps_add_design_info(sys, mssge_paths, slash);
 
     % shanly and mark's new format - generated from core_info and design_info
     if strcmp(hw_sys, 'ROACH') || strcmp(hw_sys, 'ROACH2') || strcmp(hw_sys, 'MKDIG'),
@@ -559,12 +546,15 @@ if run_edkgen,
         while 1,
             tline = fgetl(fid);
             if ~ischar(tline), break, end
-            fprintf(kcpfpg_fid, '?meta\t%s\n', tline);
+            newline = ['?meta ', tline];
+            fprintf(kcpfpg_fid, '%s\n', newline);
         end
         clear newline tline;
         fclose(fid);
-        % add git info to the design
-        git_write_info(kcpfpg_fid, sys);
+        % add git info to the design - for linux only
+        if strcmp(system_os, 'linux')
+            git_write_info(kcpfpg_fid, sys);
+        end
         % close off the file
         fprintf(kcpfpg_fid, '?quit\n');
         fclose(kcpfpg_fid);
@@ -655,9 +645,13 @@ if run_software,
             fprintf(unix_fid, ['cp design_info.tab ../bit_files/', files_name,'.info\n']);
         end
         if strcmp(hw_sys, 'ROACH2') || strcmp(hw_sys, 'ROACH2'),
+            fprintf(win_fid,  ['gzip -c ..\\bit_files\\', files_name, '.bof  > ..\\bit_files\\', files_name,'.bof.gz\n']);
             fprintf(unix_fid, ['gzip -c ../bit_files/', files_name, '.bof  > ../bit_files/', files_name,'.bof.gz\n']);
         end
         if exist([xps_path, slash, 'extended_info.kcpfpg'], 'file') == 2,
+            fprintf(win_fid,  'gzip -c implementation\\system.bin > implementation\\system.bin.gz\n');
+            fprintf(win_fid,  ['type extended_info.kcpfpg > ..\\bit_files\\', files_name,'.fpg\n']);
+            fprintf(win_fid,  ['type implementation\\system.bin.gz >> ..\\bit_files\\', files_name,'.fpg\n']);
             fprintf(unix_fid, 'gzip -c implementation/system.bin > implementation/system.bin.gz\n');
             fprintf(unix_fid, ['cat implementation/system.bin.gz >> ', xps_path, slash, 'extended_info.kcpfpg\n']);
             fprintf(unix_fid, ['cp extended_info.kcpfpg ../bit_files/', files_name,'.fpg\n']);
@@ -685,11 +679,7 @@ if run_edk,
             fprintf(fid, 'run bits\n');
         % end case 'powerpc440_ext'
         case {'ROACH2', 'MKDIG'}
-            if run_smartxplorer,
-                fprintf(fid, 'run netlist\n');
-            else
-                fprintf(fid, 'run bits\n');
-            end
+            fprintf(fid, 'run bits\n');
         % end case 'powerpc440_ext'
         otherwise
             fprintf(fid, 'run init_bram\n');
@@ -697,53 +687,30 @@ if run_edk,
     end % switch hw_sys
     fprintf(fid, 'exit\n');
     fclose(fid);
-
     eval(['cd ', xps_path]);
     status = system('xps -nw -scr run_xps.tcl system.xmp');
     if status ~= 0,
-        if exist('implementation/system.twr', 'file') == 2,
-            edit 'implementation/system.twr';
-        end
         cd(simulink_path);
         error('XPS failed.');
-    end
-    
-    if run_smartxplorer,
-        href_path = [xps_path, slash, 'implementation', slash, 'smartxplorer', slash, 'smartxplorer.html'];
-        disp('################################################');
-        disp('## Running Smartxplorer - this can take LONG. ##');
-        disp(['## Updates can be found here: ', href_path,' ##']);
-        disp('################################################');
-        
+    else
         if (strcmp(slash, '\')),
             % Windows case
-            error('Cannot run this on Windows at the present. Sorry.');
-        end
-        
-        [status, message] = gen_xps_run_smartxplorer(num_smartxplorer, xps_path, slash);
-        if status ~= 0,
-            cd(simulink_path);
-            error(['Smartxplorer failed: ', num2str(status), ' - ', message]);
-        end % /run_smartxplorer
-    end
-    
-    if (strcmp(slash, '\')),
-        % Windows case
-        [status, ~] = dos('gen_prog_files.bat');
-        if status ~= 0,
-            cd(simulink_path);
-            error('Programation files generation failed, EDK compilation probably also failed.');
-        end % if dos('gen_prog_files.bat')
-    else
-        % Linux case
-        [~, ~] = unix('chmod +x gen_prog_files');
-        [status, message] = unix('./gen_prog_files');
-        if status ~= 0,
-            cd(simulink_path);
-            disp(message);
-            error('Programation files generation failed, EDK compilation probably also failed.');
-        end % if unix('gen_prog_files.bat')
-    end %if (strcmp(slash, '\'))
+            [status, ~] = dos('gen_prog_files.bat');
+            if status ~= 0,
+                cd(simulink_path);
+                error('Programation files generation failed, EDK compilation probably also failed.');
+            end % if dos('gen_prog_files.bat')
+        else
+            % Linux case
+            [~, ~] = unix('chmod +x gen_prog_files');
+            [status, message] = unix('./gen_prog_files');
+            if status ~= 0,
+                cd(simulink_path);
+                disp(message);
+                error('Programation files generation failed, EDK compilation probably also failed.');
+            end % if unix('gen_prog_files.bat')
+        end %if (strcmp(slash, '\'))
+    end % if(dos(['xps -nw -scr run_xps.tcl system.xmp']))
     cd(simulink_path);
 end % if run_edk
 time_edk = now - start_time;
