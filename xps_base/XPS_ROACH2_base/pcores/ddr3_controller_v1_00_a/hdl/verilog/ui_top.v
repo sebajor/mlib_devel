@@ -180,7 +180,7 @@ module ui_top #
     if ( RANKS > 1 ) 
        assign app_addr_temp = app_addr;
     else
-       assign app_addr_temp = {1'b0,app_addr[ADDR_WIDTH-2 : 0]};
+        assign app_addr_temp = {1'b0,app_addr[ADDR_WIDTH-2 : 0]};
   endgenerate
 
 
