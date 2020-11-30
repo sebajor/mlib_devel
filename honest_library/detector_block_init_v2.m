@@ -12,6 +12,7 @@ munge_block(blk,varargin(:));
 chn = get_var('chn',varargin{:}); % get variable from the varargin given to the function
 lat = get_var('lat',varargin{:}); % pay attention to brackets
 nbits = get_var('nbits',varargin{:});
+behavioral = get_var('behavioral', varargin{:});
 
 %Erase every line in block
 delete_lines(blk);
@@ -47,7 +48,11 @@ reuse_block(blk,'Expression1','xbsIndex_r4/Expression','expression','a & b','Pos
 %Delay
 d_x = 60;
 d_y = 56;
-reuse_block(blk,'Delay1','xbsIndex_r4/Delay','latency',num2str(lat),'Position',get_position(500,200,d_x,d_y));
+if(behavioral)
+	reuse_block(blk,'Delay1','xbsIndex_r4/Delay','latency',num2str(lat), 'reg_retiming','on', 'Position', get_position(500,200,d_x,d_y));
+else
+	reuse_block(blk,'Delay1','xbsIndex_r4/Delay','latency',num2str(lat),'reg_retiming','off','Position', get_position(500,200,d_x,d_y));
+end
 
 %Output
 o_x = 30;

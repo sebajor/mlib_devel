@@ -1,7 +1,7 @@
 
 
 
-function honest_detector_v2(DM_Vector)
+function honest_detector_v2(DM_Vector, behavioral)
 
 % DM_Vector = [0:1:15]                        %Example DM Vector (for debugging)
 % nbits = 8                                   %Example nbits (for debugging)
@@ -12,6 +12,7 @@ nbits = log2(n_channels);                   % Number of bits of counter
 [a,b] = xInport('Data','Valid');            % In ports of subsystem
 out = xOutport('Output');                   % Out ports of subsystem
 
+disp(behavioral);
 
 %Create names for detector blocks
 det_name = {};
@@ -29,9 +30,13 @@ end
 % Create n_channels detector blocks with names det_names, using xBlock.
 % Each detector block it's connected to a 'mux signal' output.
 for i = 1:n_channels
-    det_name(i) = xBlock('honestlibrary/detector_block_v2',struct('chn',i-1,'lat',DM_Vector(i)+1,'nbits',nbits),{a,b},{mux_signals{i}});
-end
+    if(behavioral)
+        det_name(i) = xBlock('honestlibrary/detector_block_v2',struct('chn',i-1,'lat',DM_Vector(i)+1,'nbits',nbits,'behavioral', 'on'),{a,b},{mux_signals{i}});
+    else
+        det_name(i) = xBlock('honestlibrary/detector_block_v2',struct('chn',i-1,'lat',DM_Vector(i)+1,'nbits',nbits,'behavioral', 'off'),{a,b},{mux_signals{i}});
 
+    end
+end
 % Create counter to map muxes
 sel = xSignal;                                                         % Create selection signal from counter to mux
 cnt1 = xBlock('Counter',struct('n_bits',nbits,'en','on'),{b},{sel});   % Create counter for mux selection
