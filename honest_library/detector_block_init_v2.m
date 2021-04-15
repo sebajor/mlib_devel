@@ -12,6 +12,7 @@ munge_block(blk,varargin(:));
 chn = get_var('chn',varargin{:}); % get variable from the varargin given to the function
 lat = get_var('lat',varargin{:}); % pay attention to brackets
 nbits = get_var('nbits',varargin{:});
+behavioral = get_var('behavioral', varargin{:});
 
 %Erase every line in block
 delete_lines(blk);
@@ -27,7 +28,7 @@ reuse_block(blk,'Valid','built-in/inport','Port','2','Position',get_position(100
 %Constants
 c_x = 30; % x block dimension
 c_y = 26; % y block dimension
-reuse_block(blk,'Const1','xbsIndex_r4/Constant','const',num2str(chn),'n_bits','16','bin_pt','0','Position',get_position(200,300,c_x,c_y));
+reuse_block(blk,'Const1','xbsIndex_r4/Constant','const',num2str(chn),'n_bits','4','bin_pt','0','Position',get_position(200,300,c_x,c_y));
 
 %Counter
 cnt_x = 50;
@@ -47,7 +48,11 @@ reuse_block(blk,'Expression1','xbsIndex_r4/Expression','expression','a & b','Pos
 %Delay
 d_x = 60;
 d_y = 56;
-reuse_block(blk,'Delay1','xbsIndex_r4/Delay','latency',num2str(lat),'Position',get_position(500,200,d_x,d_y));
+if(behavioral)
+	reuse_block(blk,'Delay1','xbsIndex_r4/Delay','latency',num2str(lat), 'reg_retiming','on', 'Position', get_position(500,200,d_x,d_y));
+else
+	reuse_block(blk,'Delay1','xbsIndex_r4/Delay','latency',num2str(lat),'reg_retiming','off','Position', get_position(500,200,d_x,d_y));
+end
 
 %Output
 o_x = 30;

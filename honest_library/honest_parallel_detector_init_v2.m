@@ -11,6 +11,7 @@ munge_block(blk,varargin(:));
 %Get parameters into variables
 n_inputs = get_var('n_inputs',varargin{:});     % get variable from the varargin given to the function
 DM_Vector = get_var('DM_Vector',varargin{:});   % pay attention to brackets
+behavioral = get_var('behavioral', varargin{:}); %if the delays are implemented as behavioral or as instantion (using srl)
 
 %Examples (for debugging)
 % n_inputs = 4;
@@ -48,7 +49,12 @@ d_x = 115;
 d_y = 112;
 for i=1:n_inputs
     dd_name = strcat('Dedispersor_v2_',num2str(i));
-    reuse_block(blk,dd_name,'HonestLibrary/Dedispersor_v2','DM_Vector',mat2str(DM_Matrix(i,:)),'Position',get_position(200,200*i,d_x,d_y));
+    %reuse_block(blk,dd_name,'HonestLibrary/Dedispersor_v2','DM_Vector',mat2str(DM_Matrix(i,:)),'Position',get_position(200,200*i,d_x,d_y));
+    if(behavioral)
+        reuse_block(blk,dd_name,'HonestLibrary/Dedispersor_v2','DM_Vector',mat2str(DM_Matrix(i,:)), 'behavioral', 'on', 'Position',get_position(200,200*i,d_x,d_y));
+    else
+        reuse_block(blk,dd_name,'HonestLibrary/Dedispersor_v2','DM_Vector',mat2str(DM_Matrix(i,:)), 'behavioral', 'off', 'Position',get_position(200,200*i,d_x,d_y));
+    end
 end
 
 %Outputs
