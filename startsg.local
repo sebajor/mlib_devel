@@ -1,0 +1,5 @@
+LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/:/lib/x86_64-linux-gnu:/lib64/:/lib/
+export MATLAB_PATH=/usr/local/MATLAB/R2013b
+export XILINX_PATH=/opt/Xilinx/14.7/ISE_DS
+export XILINX_PLATFORM=lin64
+export JASPER_BACKEND=ise
